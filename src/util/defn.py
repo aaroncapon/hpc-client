@@ -9,8 +9,8 @@ class ConfigFileCast(BaseModel):
 
 	cluster: str
 	dry_run: bool
-	slurm_ram: str
-	slurm_cpu: str
+	scheduler_ram: Optional[str]
+	scheduler_cpu: Optional[str]
 
 	admin_contact_email: str
 	group_whitelist: bool
@@ -74,7 +74,8 @@ class Config(BaseModel):
 
 class JobSettings(BaseModel):
 	"""
-	Represents all HPC-relevant job settings.
+	Represents all HPC-relevant job settings. This is for creating and
+	submitting the HPC job.
 	"""
 
 	fw_id:  str
@@ -85,7 +86,7 @@ class JobSettings(BaseModel):
 	# The meaning of the following values vary by cluster type.
 	ram:        Optional[str]
 	cpu:        Optional[str]
-
+	gpu:        Optional[str] # 0 or more GPUs
 
 class ScriptTemplate(BaseModel):
 	"""
@@ -97,3 +98,19 @@ class ScriptTemplate(BaseModel):
 	script_log_path: str
 	cast_path:       str
 	engine_run_path: str
+
+
+class FlywheelJob(BaseModel):
+	"""
+	Represents some minimum properties for a flywheel job. Currently, it's only
+	being used for testing, so only properties relevant for testing are needed.
+	"""
+	config: dict
+	destination: dict
+	gear_id: str
+	gear_info: dict
+	id: str
+	inputs: list
+	origin: dict
+	state: str
+	tags: list

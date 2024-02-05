@@ -34,12 +34,7 @@ class Lsf(Base):
 
 		s_debug, s_write = self.determine_singularity_settings(job)
 
-		ram = job.config.get('lsf-ram', 'rusage[mem=1000]')
-		cpu = job.config.get('lsf-cpu', '1')
-
-		# Force alphanum, with some extra chars for ram syntax
-		ram = re.sub(r'[^a-zA-Z0-9\[\]\=]+', '', str(ram))
-		cpu = re.sub(r'\W+', '', str(cpu))
+		ram, cpu = self.determine_ram_and_cpu_settings(job=job)
 
 		return defn.JobSettings(
 			fw_id = str(job.id),
@@ -47,9 +42,23 @@ class Lsf(Base):
 			singularity_debug    = s_debug,
 			singularity_writable = s_write,
 
-			ram = ram,
-			cpu = cpu,
+			ram=ram,
+			cpu=cpu,
 		)
+
+	def format_scheduler_ram_and_cpu_settings(
+		self, scheduler_ram: str, scheduler_cpu: str
+	) -> (str, str):
+		if not scheduler_ram:
+			scheduler_ram = 'rusage[mem=4000]'
+		if not scheduler_cpu:
+			scheduler_cpu = '1'
+
+		# Force alphanum, with some extra chars for ram syntax
+		ram = re.sub(r'[^a-zA-Z0-9\[\]\=]+', '', str(scheduler_ram))
+		cpu = re.sub(r'\W+', '', str(scheduler_cpu))
+
+		return ram, cpu
 
 
 SCRIPT_TEMPLATE = """#!/bin/bash

@@ -1,3 +1,4 @@
+# This file is for a slurm cluster with defined GPU nodes.
 cast:
 
   # Cluster/Scheduler type.
@@ -71,18 +72,19 @@ cast:
 
   # A jinja2-templated string representing the script to generate.
   # See defn.ScriptTemplate for available values.
-  #script: |+
-  #  #!/bin/bash
-  #  #SBATCH --job-name=fw-{{job.fw_id}}
-  #  #SBATCH --ntasks=1
-  #  #SBATCH --cpus-per-task={{job.cpu}}
-  #  #SBATCH --mem-per-cpu={{job.ram}}
-  #  #SBATCH --output {{script_log_path}}
-  #
-  #  set -euo pipefail
-  #
-  #  source "{{cast_path}}/settings/credentials.sh"
-  #  cd "{{engine_run_path}}"
-  #
-  #  set -x
-  #  srun ./engine run --single-job {{job.fw_id}}
+  script: |+
+   #!/bin/bash
+   #SBATCH --job-name=fw-{{job.fw_id}}
+   #SBATCH --ntasks=1
+   #SBATCH --cpus-per-task={{job.cpu}}
+   #SBATCH --mem-per-cpu={{job.ram}}
+   {% if job.gpu %}#SBATCH --gpus-per-node={{job.gpu}}{% endif %}
+   #SBATCH --output {{script_log_path}}
+  
+   set -euo pipefail
+  
+   source "{{cast_path}}/settings/credentials.sh"
+   cd "{{engine_run_path}}"
+  
+   set -x
+   srun ./engine run --single-job {{job.fw_id}}
