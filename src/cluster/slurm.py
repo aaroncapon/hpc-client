@@ -45,6 +45,8 @@ class Slurm(Base):
         #     gpu = None
         if gpu:
             partition="gpu-a100"
+        else:
+            partition = "sapphire"
             
         return defn.JobSettings(
             fw_id=str(job.id),
