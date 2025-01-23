@@ -21,29 +21,31 @@ class Slurm(Base):
             c.script_executable = True
 
     def determine_resources_by_job_name(self, job_name):
-        # Define job-specific resource allocations here
-        if "small_job" in job_name.lower():
-            return "2G", "1"
-        elif "medium_job" in job_name.lower():
-            return "8G", "2"
-        elif "large_job" in job_name.lower():
-            return "16G", "4"
+        # Define your job-specific resource allocations here
+        if job_name.lower() in ["megre2swi"]:
+            return "4G", "2", None
+        elif job_name.lower() in ["freesurfer", "fmriprep", "hipporeport", "ibt-spm"]:
+            return "32G", "8", None
+        elif job_name.lower() in ["dwi2adc"]:
+            return "16G", "4", "1"
         else:
-            return "4G", "1"  # Default values
+            return "32G", "8", None  # Default values
 
     def determine_job_settings(self, job):
         s_debug, s_write = self.determine_singularity_settings(job)
 
         # Use job name to determine RAM and CPU
-        ram, cpu = self.determine_resources_by_job_name(job.name)
+        ram, cpu, gpu = self.determine_resources_by_job_name(job.name)
 
         # This setting can be modified to account for multiple GPUs per node
         # For now, we will assume that a job will only request one GPU
-        if "gpu" in job.tags:
-            gpu = "1"
-        else:
-            gpu = None
-
+        # if "gpu" in job.tags:
+        #     gpu = "1"
+        # else:
+        #     gpu = None
+        if gpu:
+            partition="gpu-a100"
+            
         return defn.JobSettings(
             fw_id=str(job.id),
             singularity_debug=s_debug,
@@ -51,6 +53,7 @@ class Slurm(Base):
             ram=ram,
             cpu=cpu,
             gpu=gpu,
+            partition=partition,
         )
 
     def format_scheduler_ram_and_cpu_settings(
@@ -65,6 +68,8 @@ SCRIPT_TEMPLATE = """#!/bin/bash
 #SBATCH --cpus-per-task={{job.cpu}}
 #SBATCH --mem={{job.ram}}
 #SBATCH --output {{script_log_path}}
+#SBATCH --partition={{job.partition}}
+
 
 set -euo pipefail
 

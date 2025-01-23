@@ -87,7 +87,8 @@ class JobSettings(BaseModel):
 	ram:        Optional[str]
 	cpu:        Optional[str]
 	gpu:        Optional[str] # 0 or more GPUs
-
+	partition:  Optional[str] = "sapphire"
+	
 class ScriptTemplate(BaseModel):
 	"""
 	Reresents the values available when templating an HPC script.
