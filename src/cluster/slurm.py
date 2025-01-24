@@ -35,7 +35,7 @@ class Slurm(Base):
         s_debug, s_write = self.determine_singularity_settings(job)
 
         # Use job name to determine RAM and CPU
-        ram, cpu, gpu = self.determine_resources_by_job_name(job.name)
+        ram, cpu, gpu = self.determine_resources_by_job_name(job.gear_info["name"])
 
         # This setting can be modified to account for multiple GPUs per node
         # For now, we will assume that a job will only request one GPU
